@@ -18,6 +18,11 @@ return [
         'passwords' => 'users',
     ],
 
+    'defaults' => [
+        'guard' => 'api', // Ubah dari 'web' ke 'api'
+        'passwords' => 'users',
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Authentication Guards
@@ -39,6 +44,12 @@ return [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
+        ],
+
+        'api' => [
+            'driver' => 'jwt', // Pastikan ini 'jwt'
+            'provider' => 'users',
+            'hash' => false,
         ],
     ],
 
@@ -64,7 +75,6 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
-
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',

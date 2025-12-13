@@ -2,43 +2,50 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject; // Pastikan ini di-import
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
+
+    // ... kode lainnya ...
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * Get the identifier that will be stored in the JWT subject claim.
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
+     * Return a key value array, containing any custom claims to be added to the JWT.
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    public function getJWTCustomClaims(): array
+    {
+        return [
+            'role' => $this->role,
+            'subscription' => $this->subscription,
+            'name' => $this->name,
+            'email' => $this->email
+        ];
+    }
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    protected static function newFactory()
+    {
+        return \Database\Factories\UserFactory::new();
+    }
+
+    public function driverDetail()
+    {
+        return $this->hasOne(DriverDetail::class);
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
 }
