@@ -6,7 +6,9 @@ use App\Http\Controllers\Api\AuthController;
 Route::get('/ping', function () {
     return response()->json([
         'status' => 'success',
-        'message' => 'SafeDrive API is running'
+        'message' => 'udah konek',
+        'timestamp' => now()->toISOString(),
+        'service' => 'SafeDrive API'
     ]);
 });
 
