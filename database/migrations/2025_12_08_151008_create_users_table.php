@@ -12,9 +12,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('phone')->phone();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['admin', 'company', 'driver', 'family'])->default('driver');
+            $table->enum('subscription', ['free', 'premium'])->default('free');
             $table->foreignId('company_id')->nullable()->constrained('companies')->onDelete('cascade');
             $table->rememberToken();
             $table->timestamps();

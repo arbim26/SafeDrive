@@ -5,16 +5,29 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Tymon\JWTAuth\Contracts\JWTSubject; // Pastikan ini di-import
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
-    // ... kode lainnya ...
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+        'phone',
+        'subscription',
+        'company_id'
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
     /**
-     * Get the identifier that will be stored in the JWT subject claim.
+     * JWT identifier
      */
     public function getJWTIdentifier()
     {
@@ -22,7 +35,7 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Return a key value array, containing any custom claims to be added to the JWT.
+     * Custom JWT claims
      */
     public function getJWTCustomClaims(): array
     {

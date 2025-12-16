@@ -14,12 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => 'web',
-        'passwords' => 'users',
-    ],
-
-    'defaults' => [
-        'guard' => 'api', // Ubah dari 'web' ke 'api'
+        'guard' => 'api', 
         'passwords' => 'users',
     ],
 
@@ -45,11 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-
+    
         'api' => [
-            'driver' => 'jwt', // Pastikan ini 'jwt'
+            'driver' => 'jwt',
             'provider' => 'users',
-            'hash' => false,
         ],
     ],
 

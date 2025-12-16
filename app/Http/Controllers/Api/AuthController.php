@@ -25,74 +25,68 @@ class AuthController extends Controller
      * Register a new user
      */
     public function register(RegisterRequest $request): JsonResponse
-    {
-        try {
-            DB::beginTransaction();
-            
-            $userData = [
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role' => $request->role ?? 'driver',
+{
+    DB::beginTransaction();
+
+    try {
+        $userData = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role ?? 'driver',
+            'phone' => $request->phone,
+            'subscription' => 'free'
+        ];
+
+        // Jika company
+        if ($request->role === 'company') {
+            $company = Company::create([
+                'name' => $request->company_name,
+                'email' => $request->company_email,
                 'phone' => $request->phone,
-                'subscription' => 'free'
-            ];
-            
-            // Jika user mendaftar sebagai company
-            if ($request->role === 'company') {
-                $company = Company::create([
-                    'name' => $request->company_name,
-                    'email' => $request->company_email,
-                    'phone' => $request->phone,
-                ]);
-                
-                $userData['company_id'] = $company->id;
-            }
-            
-            // Buat user
-            $user = User::create($userData);
-            
-            // Jika user adalah driver, buat driver detail
-            if ($user->role === 'driver') {
-                DriverDetail::create([
-                    'user_id' => $user->id,
-                    'license_number' => $request->license_number,
-                    'license_expiry' => $request->license_expiry,
-                    'emergency_contacts' => $request->emergency_contacts ?? [],
-                ]);
-            }
-            
-            // Generate token
-            $token = auth()->login($user);
-            
-            DB::commit();
-            
-            return response()->json([
-                'status' => 'success',
-                'message' => 'User registered successfully',
-                'user' => $user,
-                'authorization' => [
-                    'token' => $token,
-                    'type' => 'bearer',
-                    'expires_in' => JWTAuth::factory()->getTTL() * 60
-                ]
-            ], 201);
-            
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            Log::error('Registration failed', [
-                'email' => $request->email,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
             ]);
-            
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Registration failed. Please try again.'
-            ], 500);
+
+            $userData['company_id'] = $company->id;
         }
+
+        // Buat user
+        $user = User::create($userData);
+
+        // Jika driver
+        if ($user->role === 'driver') {
+            DriverDetail::create([
+                'user_id' => $user->id,
+                'license_number' => $request->license_number,
+                'license_expiry' => $request->license_expiry,
+                'emergency_contacts' => json_encode($request->emergency_contacts ?? []),
+            ]);
+        }
+
+        // Generate JWT
+        $token = auth()->login($user);
+
+        DB::commit();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User registered successfully',
+            'user' => $user,
+            'authorization' => [
+                'token' => $token,
+                'type' => 'bearer',
+                'expires_in' => auth()->factory()->getTTL() * 60
+            ]
+        ], 201);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage() // 🔥 sementara untuk debug
+        ], 500);
     }
+}
 
     /**
      * Login user
